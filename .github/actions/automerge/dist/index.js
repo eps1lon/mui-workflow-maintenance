@@ -4728,7 +4728,7 @@ async function automerge(context) {
 
 main().catch(error => {
   core.error(error);
-  core.setFailed(error.message);
+  core.setFailed(String(error.message));
 });
 
 
