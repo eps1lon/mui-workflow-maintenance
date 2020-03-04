@@ -4,7 +4,9 @@ const github = require("@actions/github");
 function main() {
   const repoToken = core.getInput("repoToken", { required: true });
   const dirtyLabel = core.getInput("dirtyLabel", { required: true });
-  const removeOnDirtyLabel = core.getInput("removeOnDirtyLabel", { required: true });
+  const removeOnDirtyLabel = core.getInput("removeOnDirtyLabel", {
+    required: true
+  });
 
   const client = new github.GitHub(repoToken);
 
@@ -41,9 +43,6 @@ async function checkDirty(context) {
       `found pr: ${pullRequest.title} last updated ${pullRequest.updated_at}`
     );
 
-    const labelNames = pullRequest.labels.map(label => label.name);
-    const isReady = labelNames.includes(mergeLabel);
-
     core.info(`pr's mergable state is ${pullRequest.mergeable_state}`);
     if (pullRequest.mergeable_state === "dirty") {
       // for labels PRs and issues are the same
@@ -58,7 +57,7 @@ async function checkDirty(context) {
           owner: github.context.repo.owner,
           repo: github.context.repo.repo,
           issue_number: pullRequest.number,
-          name: mergeLabel
+          name: removeOnDirtyLabel
         })
       ]);
     }
