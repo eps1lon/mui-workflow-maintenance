@@ -4641,21 +4641,26 @@ module.exports = {"name":"@octokit/rest","version":"16.43.1","publishConfig":{"a
 const core = __webpack_require__(718);
 const github = __webpack_require__(104);
 
-function main() {
-  const repoToken = core.getInput("repoToken", { required: true });
-  const failedLabel = core.getInput("failedLabel", { required: true });
-  const mergeLabel = core.getInput("mergeLabel", { required: true });
-  const mergeMethod = core.getInput("mergeMethod", { required: true });
+async function main() {
+  try {
+    const repoToken = core.getInput("repoToken", { required: true });
+    const failedLabel = core.getInput("failedLabel", { required: true });
+    const mergeLabel = core.getInput("mergeLabel", { required: true });
+    const mergeMethod = core.getInput("mergeMethod", { required: true });
 
-  const client = new github.GitHub(repoToken);
+    const client = new github.GitHub(repoToken);
 
-  return automerge({
-    client,
-    failedLabel,
-    mergeLabel,
-    mergeMethod,
-    page: 0
-  });
+    await automerge({
+      client,
+      failedLabel,
+      mergeLabel,
+      mergeMethod,
+      page: 0
+    });
+  } catch (error) {
+    core.error(String(error));
+    core.setFailed(String(error.message));
+  }
 }
 
 /**
@@ -4726,9 +4731,7 @@ async function automerge(context) {
   return automerge({ ...context, page: page + 1 });
 }
 
-main().catch(error => {
-  core.setFailed(String(error.message));
-});
+main();
 
 
 /***/ }),
