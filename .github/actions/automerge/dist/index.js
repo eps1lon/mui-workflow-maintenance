@@ -4641,7 +4641,7 @@ module.exports = {"name":"@octokit/rest","version":"16.43.1","publishConfig":{"a
 const core = __webpack_require__(718);
 const github = __webpack_require__(104);
 
-async function main() {
+function main() {
   const repoToken = core.getInput("repoToken", { required: true });
   const failedLabel = core.getInput("failedLabel", { required: true });
   const mergeLabel = core.getInput("mergeLabel", { required: true });
