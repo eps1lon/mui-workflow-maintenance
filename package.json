@@ -1,0 +1,7 @@
+{
+  "name": "worktree",
+  "private": true,
+  "workspaces": [
+    ".github/actions/*"
+  ]
+}
