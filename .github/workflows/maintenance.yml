@@ -16,7 +16,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2
       - name: check if prs are dirty
-        uses: "./.github/actions/automerge"
+        uses: "./.github/actions/check-dirty"
         with:
           dirtyLabel: "PR: needs rebase"
           removeOnDirtyLabel: "PR: ready to ship"
