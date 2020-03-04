@@ -4680,14 +4680,14 @@ async function automerge(context) {
   }
 
   for (const pullRequest of pullsResponse.data.values()) {
-    core.debug(
+    core.info(
       `found issue: ${pullRequest.title} last updated ${pullRequest.updated_at}`
     );
 
     const labelNames = pullRequest.labels.map(label => label.name);
     const isReady = labelNames.includes(mergeLabel);
 
-    core.debug(
+    core.info(
       `pr is ${
         isReady ? "ready" : "not ready"
       } because ([${labelNames}].includes('${mergeLabel}')) === ${isReady}`
