@@ -1,21 +1,21 @@
-const core = require('@actions/core');
-const github = require('@actions/github');
+const core = require("@actions/core");
+const github = require("@actions/github");
 
 async function main() {
-  const repoToken = core.getInput('repoToken', { required: true });
-  const failedLabel = core.getInput('failedLabel', { required: true });
-  const mergeLabel = core.getInput('mergeLabel', { required: true });
-  const mergeMethod = core.getInput('mergeMethod', { required: true });
+  const repoToken = core.getInput("repoToken", { required: true });
+  const failedLabel = core.getInput("failedLabel", { required: true });
+  const mergeLabel = core.getInput("mergeLabel", { required: true });
+  const mergeMethod = core.getInput("mergeMethod", { required: true });
 
   const client = new github.GitHub(repoToken);
 
-  await automerge({
+  return automerge({
     client,
     failedLabel,
     mergeLabel,
     mergeMethod,
     mergeCommitMessage,
-    page: 0,
+    page: 0
   });
 }
 
@@ -30,9 +30,9 @@ async function automerge(context) {
   const pullsResponse = await client.pulls.list({
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
-    state: 'open',
+    state: "open",
     per_page: 100,
-    page,
+    page
   });
 
   if (pullsResponse.data.length === 0) {
@@ -40,19 +40,21 @@ async function automerge(context) {
   }
 
   for (const pullRequest of pullsResponse.data.values()) {
-    core.debug(`found issue: ${pullRequest.title} last updated ${pullRequests.updated_at}`);
+    core.debug(
+      `found issue: ${pullRequest.title} last updated ${pullRequests.updated_at}`
+    );
 
     const labelNames = pullRequest.labels.map(label => label.name);
     const isReady = labelNames.includes(mergeLabel);
 
     core.debug(
       `pr is ${
-        isReady ? 'ready' : 'not ready'
-      } because ([${labelNames}].includes('${mergeLabel}')) === ${isReady}`,
+        isReady ? "ready" : "not ready"
+      } because ([${labelNames}].includes('${mergeLabel}')) === ${isReady}`
     );
 
     if (isReady) {
-      const isClean = pullRequest.mergeable_state === 'clean';
+      const isClean = pullRequest.mergeable_state === "clean";
 
       if (isClean) {
         await client.pulls.merge({
@@ -60,7 +62,7 @@ async function automerge(context) {
           repo: github.context.repo.repo,
           pull_number: pullRequest.number,
           commit_title: pullRequest.title,
-          merge_method,
+          merge_method
         });
       } else {
         // for labels PRs and issues are the same
@@ -69,14 +71,14 @@ async function automerge(context) {
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
             number: pullRequest.number,
-            labels: [failedLabel],
+            labels: [failedLabel]
           }),
           client.issues.removeLabel({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
             number: pullRequest.number,
-            name: mergeLabel,
-          }),
+            name: mergeLabel
+          })
         ]);
       }
     }

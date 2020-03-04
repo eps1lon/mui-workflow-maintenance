@@ -3,5 +3,8 @@
   "private": true,
   "workspaces": [
     ".github/actions/*"
-  ]
+  ],
+  "scripts": {
+    "p": "yarn workspace automerge package"
+  }
 }
