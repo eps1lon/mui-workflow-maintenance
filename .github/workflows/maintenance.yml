@@ -1,11 +1,26 @@
 name: "Maintenance"
 on:
+  push:
+    branches:
+      - master
   #pull_request:
   #  types: [labeled, unlabeled]
-  schedule:
-  - cron: "*/2 * * * *"
+  #schedule:
+  #  - cron: "*/2 * * * *"
 
 jobs:
+  check-pr-state:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name === "push" }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: check if prs are dirty
+        uses: "./.github/actions/automerge"
+        with:
+          dirtyLabel: "PR: needs rebase"
+          removeOnDirtyLabel: "PR: ready to ship"
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
   ship-prs:
     runs-on: ubuntu-latest
     steps:

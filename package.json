@@ -6,7 +6,8 @@
   ],
   "scripts": {
     "l": "eslint .github/",
-    "p": "yarn workspace automerge package"
+    "p": "yarn workspace automerge package",
+    "p2": "yarn workspace check-dirty package"
   },
   "devDependencies": {
     "eslint": "^6.8.0"
