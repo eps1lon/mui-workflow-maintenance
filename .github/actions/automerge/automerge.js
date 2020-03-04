@@ -87,6 +87,5 @@ async function automerge(context) {
 }
 
 main().catch(error => {
-  core.error(String(error));
   core.setFailed(String(error.message));
 });
