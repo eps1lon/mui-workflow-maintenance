@@ -11,12 +11,6 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      # I'd expect github actions to do this themselves but they don't actually support local actions
-      - name: setup node
-        uses: actions/setup-node@v1
-        with:
-          node-version: "12.x"
-      - run: yarn install
       - name: merge ready PRs
         uses: "./.github/actions/automerge"
         with:
