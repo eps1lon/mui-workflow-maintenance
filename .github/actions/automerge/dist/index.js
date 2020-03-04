@@ -4643,6 +4643,7 @@ const github = __webpack_require__(104);
 
 function main() {
   const repoToken = core.getInput("repoToken", { required: true });
+  const dirtyLabel = core.getInput("dirtyLabel", { required: true });
   const failedLabel = core.getInput("failedLabel", { required: true });
   const mergeLabel = core.getInput("mergeLabel", { required: true });
   const mergeMethod = core.getInput("mergeMethod", { required: true });
@@ -4673,7 +4674,6 @@ async function automerge(context) {
     per_page: 100,
     page
   });
-  throw Error(test);
 
   if (pullsResponse.data.length === 0) {
     return;
@@ -4694,9 +4694,7 @@ async function automerge(context) {
     );
 
     if (isReady) {
-      const isClean = pullRequest.mergeable_state === "clean";
-
-      if (isClean) {
+      if (pullRequest.mergeable_state === "clean") {
         await client.pulls.merge({
           owner: github.context.repo.owner,
           repo: github.context.repo.repo,
@@ -4704,6 +4702,22 @@ async function automerge(context) {
           commit_title: pullRequest.title,
           merge_method: mergeMethod
         });
+      } else if (pullRequest.mergeable_state === "dirty") {
+        // for labels PRs and issues are the same
+        await Promise.all([
+          client.issues.addLabels({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+            issue_number: pullRequest.number,
+            labels: [dirtyLabel]
+          }),
+          client.issues.removeLabel({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+            issue_number: pullRequest.number,
+            name: mergeLabel
+          })
+        ]);
       } else {
         // for labels PRs and issues are the same
         await Promise.all([

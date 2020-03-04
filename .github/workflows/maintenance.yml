@@ -16,5 +16,6 @@ jobs:
         with:
           mergeLabel: "PR: ready to ship"
           mergeMethod: "squash"
-          failedLabel: "PR: needs rebase"
+          dirtyLabel: "PR: needs rebase"
+          failedLabel: "PR: needs revision"
           repoToken: "${{ secrets.GITHUB_TOKEN }}"

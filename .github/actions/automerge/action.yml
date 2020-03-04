@@ -12,6 +12,9 @@ inputs:
     description: 'Either "squash" or "merge" or "rebase"'
     required: true
   failedLabel:
+    description: "Name of the label which indicates that the PR cannot be merged"
+    required: true
+  dirtyLabel:
     description: "Name of the label which indicates that the PR needs to be updated"
     required: true
 runs:
