@@ -14,7 +14,6 @@ function main() {
     failedLabel,
     mergeLabel,
     mergeMethod,
-    mergeCommitMessage,
     page: 0
   });
 }
