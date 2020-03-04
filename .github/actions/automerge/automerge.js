@@ -1,7 +1,7 @@
 const core = require("@actions/core");
 const github = require("@actions/github");
 
-async function main() {
+function main() {
   const repoToken = core.getInput("repoToken", { required: true });
   const failedLabel = core.getInput("failedLabel", { required: true });
   const mergeLabel = core.getInput("mergeLabel", { required: true });
