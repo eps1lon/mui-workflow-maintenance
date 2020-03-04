@@ -2,8 +2,8 @@ name: "Maintenance"
 on:
   issues:
     types: [labeled, unlabeled]
-  schedule:
-  - cron: "*/2 * * * *"
+  #schedule:
+  #- cron: "*/2 * * * *"
 
 jobs:
   ship-prs:
