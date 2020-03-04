@@ -1,26 +1,21 @@
 const core = require("@actions/core");
 const github = require("@actions/github");
 
-async function main() {
-  try {
-    const repoToken = core.getInput("repoToken", { required: true });
-    const failedLabel = core.getInput("failedLabel", { required: true });
-    const mergeLabel = core.getInput("mergeLabel", { required: true });
-    const mergeMethod = core.getInput("mergeMethod", { required: true });
+function main() {
+  const repoToken = core.getInput("repoToken", { required: true });
+  const failedLabel = core.getInput("failedLabel", { required: true });
+  const mergeLabel = core.getInput("mergeLabel", { required: true });
+  const mergeMethod = core.getInput("mergeMethod", { required: true });
 
-    const client = new github.GitHub(repoToken);
+  const client = new github.GitHub(repoToken);
 
-    await automerge({
-      client,
-      failedLabel,
-      mergeLabel,
-      mergeMethod,
-      page: 0
-    });
-  } catch (error) {
-    core.error(String(error));
-    core.setFailed(String(error.message));
-  }
+  return automerge({
+    client,
+    failedLabel,
+    mergeLabel,
+    mergeMethod,
+    page: 0
+  });
 }
 
 /**
@@ -38,6 +33,7 @@ async function automerge(context) {
     per_page: 100,
     page
   });
+  throw Error(test);
 
   if (pullsResponse.data.length === 0) {
     return;
@@ -74,13 +70,13 @@ async function automerge(context) {
           client.issues.addLabels({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
-            number: pullRequest.number,
+            issue_number: pullRequest.number,
             labels: [failedLabel]
           }),
           client.issues.removeLabel({
             owner: github.context.repo.owner,
             repo: github.context.repo.repo,
-            number: pullRequest.number,
+            issue_number: pullRequest.number,
             name: mergeLabel
           })
         ]);
@@ -91,4 +87,7 @@ async function automerge(context) {
   return automerge({ ...context, page: page + 1 });
 }
 
-main();
+main().catch(error => {
+  core.error(String(error));
+  core.setFailed(String(error.message));
+});
