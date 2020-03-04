@@ -6,5 +6,8 @@
   ],
   "scripts": {
     "p": "yarn workspace automerge package"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0"
   }
 }
