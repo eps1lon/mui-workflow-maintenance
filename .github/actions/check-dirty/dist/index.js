@@ -6952,7 +6952,7 @@ async function checkDirty(context) {
       `found pr: ${pullRequest.title} last updated ${pullRequest.updated_at}`
     );
 
-    core.info(Object.keys(pullRequest.mergeable_state));
+    core.info(Object.keys(pullRequest));
     core.info(`pr's mergable state is ${pullRequest.mergeable_state}`);
     if (pullRequest.mergeable_state === "dirty") {
       // for labels PRs and issues are the same
