@@ -1,5 +1,7 @@
 name: "Maintenance"
 on:
+  issues:
+    types: [labeled, unlabeled]
   schedule:
   - cron: "*/2 * * * *"
 
