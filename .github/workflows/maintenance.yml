@@ -17,5 +17,4 @@ jobs:
           mergeLabel: "PR: ready to ship"
           mergeMethod: "squash"
           failedLabel: "PR: needs rebase"
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
