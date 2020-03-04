@@ -5,6 +5,7 @@
     ".github/actions/*"
   ],
   "scripts": {
+    "l": "eslint .github/",
     "p": "yarn workspace automerge package"
   },
   "devDependencies": {

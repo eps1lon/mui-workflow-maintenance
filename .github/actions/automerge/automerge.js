@@ -40,7 +40,7 @@ async function automerge(context) {
 
   for (const pullRequest of pullsResponse.data.values()) {
     core.debug(
-      `found issue: ${pullRequest.title} last updated ${pullRequests.updated_at}`
+      `found issue: ${pullRequest.title} last updated ${pullRequest.updated_at}`
     );
 
     const labelNames = pullRequest.labels.map(label => label.name);
@@ -61,7 +61,7 @@ async function automerge(context) {
           repo: github.context.repo.repo,
           pull_number: pullRequest.number,
           commit_title: pullRequest.title,
-          merge_method
+          merge_method: mergeMethod
         });
       } else {
         // for labels PRs and issues are the same
