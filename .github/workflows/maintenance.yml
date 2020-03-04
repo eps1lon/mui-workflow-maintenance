@@ -9,13 +9,19 @@ jobs:
   ship-prs:
     runs-on: ubuntu-latest
     steps:
-    - name: checkout
-      uses: actions/checkout@v2
-    - name: merge ready PRs
-      uses: "./.github/actions/automerge"
-      with:
-        mergeLabel: "PR: ready to ship"
-        mergeMethod: "squash"
-        failedLabel: "PR: needs rebase"
-      env:
-        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      - name: checkout
+        uses: actions/checkout@v2
+      # I'd expect github actions to do this themselves but they don't actually support local actions
+      - name: setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: "12.x"
+      - run: yarn install
+      - name: merge ready PRs
+        uses: "./.github/actions/automerge"
+        with:
+          mergeLabel: "PR: ready to ship"
+          mergeMethod: "squash"
+          failedLabel: "PR: needs rebase"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
