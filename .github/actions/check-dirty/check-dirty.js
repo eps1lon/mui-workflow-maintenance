@@ -20,7 +20,7 @@ async function main() {
     `
     query { 
       repository(owner:"${github.context.repo.owner}", name: "${github.context.repo.repo}") { 
-        pullRequests(first:100, after:${endCursor}, states: OPEN) {
+        pullRequests(first:100, states: OPEN) {
           nodes {
             mergeStateStatus
             number
