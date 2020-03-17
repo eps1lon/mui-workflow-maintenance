@@ -8,7 +8,9 @@ function main() {
     required: true
   });
 
-  const client = new github.GitHub(repoToken);
+  const client = new github.GitHub(repoToken, {
+    mediaType: { previews: ["merge-info"] }
+  });
 
   return checkDirty({
     client,
@@ -46,9 +48,7 @@ query {
 }
   `;
   core.info(query);
-  const pullsResponse = await client.graphql(query, {
-    mediaType: { previews: ["merge-info-preview"] }
-  });
+  const pullsResponse = await client.graphql(query);
 
   core.info(pullsResponse);
 
