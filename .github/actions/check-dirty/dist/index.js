@@ -6923,7 +6923,7 @@ function main() {
     client,
     dirtyLabel,
     removeOnDirtyLabel,
-    page: 0
+    endCursor: null
   });
 }
 
@@ -6933,15 +6933,32 @@ function main() {
  * @param {import('@actions/github').GitHub} context.client
  */
 async function checkDirty(context) {
-  const { client, dirtyLabel, removeOnDirtyLabel, page } = context;
+  const { client, dirtyLabel, removeOnDirtyLabel, endCursor } = context;
 
-  const pullsResponse = await client.pulls.list({
-    owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
-    state: "open",
-    per_page: 100,
-    page
+  const query = `
+query { 
+  repository(owner:"${github.context.repo.owner}", name: "${github.context.repo.repo}") { 
+    pullRequests(first:100, after:${endCursor}, states: OPEN) {
+      nodes {
+        mergeStateStatus
+        number
+        title
+        updatedAt
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+    }
+    
+  }
+}
+  `;
+  const pullsResponse = await client.graphql(query, {
+    mediaType: { previews: ["merge-info"] }
   });
+
+  core.info(pullsResponse);
 
   if (pullsResponse.data.length === 0) {
     return;
@@ -6949,12 +6966,12 @@ async function checkDirty(context) {
 
   for (const pullRequest of pullsResponse.data.values()) {
     core.info(
-      `found pr: ${pullRequest.title} last updated ${pullRequest.updated_at}`
+      `found pr: ${pullRequest.title} last updated ${pullRequest.updatedAt}`
     );
 
     core.info(Object.keys(pullRequest));
-    core.info(`pr's mergable state is ${pullRequest.mergeable_state}`);
-    if (pullRequest.mergeable_state === "dirty") {
+    core.info(`pr's mergable state is ${pullRequest.mergeStateStatus}`);
+    if (pullRequest.mergeStateStatus === "DIRTY") {
       // for labels PRs and issues are the same
       await Promise.all([
         client.issues.addLabels({
@@ -6973,7 +6990,10 @@ async function checkDirty(context) {
     }
   }
 
-  return checkDirty({ ...context, page: page + 1 });
+  return checkDirty({
+    ...context,
+    endCursor: pullsResponse.data.pageInfo.endCursor
+  });
 }
 
 main().catch(error => {
