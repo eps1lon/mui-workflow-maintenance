@@ -6909,10 +6909,11 @@ exports.createTokenAuth = createTokenAuth;
 
 const core = __webpack_require__(718);
 const github = __webpack_require__(104);
+const { graphql } = __webpack_require__(51);
 
 const previews = ["merge-info"];
 
-function main() {
+async function main() {
   const repoToken = core.getInput("repoToken", { required: true });
   const dirtyLabel = core.getInput("dirtyLabel", { required: true });
   const removeOnDirtyLabel = core.getInput("removeOnDirtyLabel", {
@@ -6924,7 +6925,37 @@ function main() {
     previews
   });
 
-  return checkDirty({
+  const res = await graphql(
+    `
+    query { 
+      repository(owner:"${github.context.repo.owner}", name: "${github.context.repo.repo}") { 
+        pullRequests(first:100, after:${endCursor}, states: OPEN) {
+          nodes {
+            mergeStateStatus
+            number
+            title
+            updatedAt
+          }
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+        }
+        
+      }
+    }
+    `,
+    {
+      headers: {
+        authorization: `token ${repoToken}`,
+        accept: "application/vnd.github.merge-info-preview+json"
+      }
+    }
+  );
+
+  core.info(res)
+
+  return await checkDirty({
     client,
     dirtyLabel,
     removeOnDirtyLabel,
@@ -6940,6 +6971,7 @@ function main() {
 async function checkDirty(context) {
   const { client, dirtyLabel, removeOnDirtyLabel, endCursor } = context;
 
+  client.graphql.endpoint
   const query = `
 query { 
   repository(owner:"${github.context.repo.owner}", name: "${github.context.repo.repo}") { 
@@ -6961,8 +6993,9 @@ query {
   `;
   core.info(query);
   const pullsResponse = await client.graphql(query, {
-    mediaType: { previews },
-    previews
+    headers: {
+      accept: "application/vnd.github.merge-info-preview+json"
+    }
   });
 
   core.info(pullsResponse);

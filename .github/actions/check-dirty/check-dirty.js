@@ -4,7 +4,7 @@ const { graphql } = require("@octokit/graphql");
 
 const previews = ["merge-info"];
 
-function main() {
+async function main() {
   const repoToken = core.getInput("repoToken", { required: true });
   const dirtyLabel = core.getInput("dirtyLabel", { required: true });
   const removeOnDirtyLabel = core.getInput("removeOnDirtyLabel", {
@@ -16,7 +16,7 @@ function main() {
     previews
   });
 
-  const { repository } = await graphql(
+  const res = await graphql(
     `
     query { 
       repository(owner:"${github.context.repo.owner}", name: "${github.context.repo.repo}") { 
@@ -44,7 +44,9 @@ function main() {
     }
   );
 
-  return checkDirty({
+  core.info(res)
+
+  return await checkDirty({
     client,
     dirtyLabel,
     removeOnDirtyLabel,
