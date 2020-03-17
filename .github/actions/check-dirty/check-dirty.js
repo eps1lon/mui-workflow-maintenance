@@ -1,5 +1,6 @@
 const core = require("@actions/core");
 const github = require("@actions/github");
+const { graphql } = require("@octokit/graphql");
 
 const previews = ["merge-info"];
 
@@ -14,6 +15,34 @@ function main() {
     mediaType: { previews },
     previews
   });
+
+  const { repository } = await graphql(
+    `
+    query { 
+      repository(owner:"${github.context.repo.owner}", name: "${github.context.repo.repo}") { 
+        pullRequests(first:100, after:${endCursor}, states: OPEN) {
+          nodes {
+            mergeStateStatus
+            number
+            title
+            updatedAt
+          }
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+        }
+        
+      }
+    }
+    `,
+    {
+      headers: {
+        authorization: `token ${repoToken}`,
+        accept: "application/vnd.github.merge-info-preview+json"
+      }
+    }
+  );
 
   return checkDirty({
     client,
@@ -31,6 +60,7 @@ function main() {
 async function checkDirty(context) {
   const { client, dirtyLabel, removeOnDirtyLabel, endCursor } = context;
 
+  client.graphql.endpoint
   const query = `
 query { 
   repository(owner:"${github.context.repo.owner}", name: "${github.context.repo.repo}") { 
