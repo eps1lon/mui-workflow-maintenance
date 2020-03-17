@@ -52,8 +52,9 @@ query {
   `;
   core.info(query);
   const pullsResponse = await client.graphql(query, {
-    mediaType: { previews },
-    previews
+    headers: {
+      accept: "application/vnd.github.merge-info-preview+json"
+    }
   });
 
   core.info(pullsResponse);
