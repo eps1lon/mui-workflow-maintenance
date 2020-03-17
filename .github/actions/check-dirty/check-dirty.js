@@ -45,8 +45,9 @@ query {
   }
 }
   `;
+  core.info(query);
   const pullsResponse = await client.graphql(query, {
-    mediaType: { previews: ["starfox"] }
+    mediaType: { previews: ["merge-info-preview"] }
   });
 
   core.info(pullsResponse);
