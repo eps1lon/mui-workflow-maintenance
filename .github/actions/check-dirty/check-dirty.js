@@ -46,7 +46,7 @@ query {
 }
   `;
   const pullsResponse = await client.graphql(query, {
-    mediaType: { previews: ["merge-info"] }
+    mediaType: { previews: ["starfox"] }
   });
 
   core.info(pullsResponse);
