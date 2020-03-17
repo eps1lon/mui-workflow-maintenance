@@ -1,6 +1,8 @@
 const core = require("@actions/core");
 const github = require("@actions/github");
 
+const previews = ["merge-info"];
+
 function main() {
   const repoToken = core.getInput("repoToken", { required: true });
   const dirtyLabel = core.getInput("dirtyLabel", { required: true });
@@ -9,7 +11,8 @@ function main() {
   });
 
   const client = new github.GitHub(repoToken, {
-    mediaType: { previews: ["merge-info"] }
+    mediaType: { previews },
+    previews
   });
 
   return checkDirty({
@@ -48,7 +51,10 @@ query {
 }
   `;
   core.info(query);
-  const pullsResponse = await client.graphql(query);
+  const pullsResponse = await client.graphql(query, {
+    mediaType: { previews },
+    previews
+  });
 
   core.info(pullsResponse);
 

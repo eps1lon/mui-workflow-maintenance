@@ -6910,6 +6910,8 @@ exports.createTokenAuth = createTokenAuth;
 const core = __webpack_require__(718);
 const github = __webpack_require__(104);
 
+const previews = ["merge-info"];
+
 function main() {
   const repoToken = core.getInput("repoToken", { required: true });
   const dirtyLabel = core.getInput("dirtyLabel", { required: true });
@@ -6918,7 +6920,8 @@ function main() {
   });
 
   const client = new github.GitHub(repoToken, {
-    mediaType: { previews: ["merge-info"] }
+    mediaType: { previews },
+    previews
   });
 
   return checkDirty({
@@ -6957,7 +6960,10 @@ query {
 }
   `;
   core.info(query);
-  const pullsResponse = await client.graphql(query);
+  const pullsResponse = await client.graphql(query, {
+    mediaType: { previews },
+    previews
+  });
 
   core.info(pullsResponse);
 
