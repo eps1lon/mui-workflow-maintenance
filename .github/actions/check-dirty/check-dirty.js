@@ -141,7 +141,7 @@ function removeLabel(label, { number }, { client }) {
       owner: github.context.repo.owner,
       repo: github.context.repo.repo,
       issue_number: number,
-      name: dirtyLabel
+      name: label
     })
     .catch(error => {
       core.error(`error removing "${label}": ${error}`);
