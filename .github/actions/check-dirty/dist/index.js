@@ -6924,7 +6924,7 @@ async function main() {
     client,
     dirtyLabel,
     removeOnDirtyLabel,
-    endCursor: null
+    after: null
   });
 }
 
@@ -6997,6 +6997,7 @@ query {
     }
   }
 
+  core.info(JSON.stringify(pageInfo));
   if (pageInfo.hasNextPage) {
     return checkDirty({
       ...context,
