@@ -27,13 +27,14 @@ async function main() {
 async function checkDirty(context) {
   const { after, client, dirtyLabel, removeOnDirtyLabel } = context;
 
+  // mergeStateStatus is includede for experimenting
+  // it's unclear if a pr can have mergeStateStatus=dirty AND mergable!=MERGABLE
   const query = `
 query openPullRequests($owner: String!, $repo: String!, $after: String) { 
   repository(owner:$owner, name: $repo) { 
     pullRequests(first:100, after:$after, states: OPEN) {
       nodes {
         mergeable
-        mergeStateStatus
         number
         permalink
         title
@@ -51,7 +52,7 @@ query openPullRequests($owner: String!, $repo: String!, $after: String) {
   core.debug(query);
   const pullsResponse = await client.graphql(query, {
     headers: {
-      accept: "application/vnd.github.merge-info-preview+json"
+      //accept: "application/vnd.github.merge-info-preview+json"
     },
     after,
     owner: github.context.repo.owner,
@@ -63,19 +64,24 @@ query openPullRequests($owner: String!, $repo: String!, $after: String) {
       pullRequests: { nodes: pullRequests, pageInfo }
     }
   } = pullsResponse;
-  core.debug(JSON.stringify(pullsResponse, null, 2));
+  // JSON.stringify might be expensive
+  if (core.isDebug) {
+    core.debug(JSON.stringify(pullsResponse, null, 2));
+  }
 
   if (pullRequests.length === 0) {
     return;
   }
 
   for (const pullRequest of pullRequests) {
-    core.info(`found pr: "${pullRequest.title}" at ${pullRequest.permalink}`);
-
+    const isMergable = pullRequest.mergable === "MERGABLE";
     core.info(
-      `mergeStateStatus: '${pullRequest.mergeStateStatus}', mergable: '${pullRequest.mergeable}'`
+      `PR "${pullRequest.title}" ${
+        !isMergable ? "is not mergable" : "is mergable"
+      }`
     );
-    if (pullRequest.mergeStateStatus === "DIRTY") {
+
+    if (!isMergable) {
       // for labels PRs and issues are the same
       await Promise.all([
         client.issues.addLabels({
