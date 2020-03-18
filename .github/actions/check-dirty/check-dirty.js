@@ -53,10 +53,10 @@ query {
     }
   });
 
-  const { repository } = pullsResponse;
-
+  const {
+    repository: { pullRequests }
+  } = pullsResponse;
   core.info(Object.keys(repository));
-  const { pullRequests } = repository;
 
   if (pullRequests.length === 0) {
     return;
