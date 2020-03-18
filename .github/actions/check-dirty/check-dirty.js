@@ -53,13 +53,15 @@ query {
     }
   });
 
-  core.info(Object.keys(pullsResponse));
+  const {
+    repository: { pullRequests }
+  } = pullsResponse;
 
-  if (pullsResponse.data.length === 0) {
+  if (pullRequests.length === 0) {
     return;
   }
 
-  for (const pullRequest of pullsResponse.data.values()) {
+  for (const pullRequest of pullRequests) {
     core.info(
       `found pr: ${pullRequest.title} last updated ${pullRequest.updatedAt}`
     );
