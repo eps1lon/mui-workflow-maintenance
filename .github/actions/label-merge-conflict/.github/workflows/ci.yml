@@ -1,0 +1,36 @@
+name: "CI"
+on: [push, pull_request]
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "12.x"
+      - name: Install dependencies
+        run: yarn
+      - name: Format
+        run: yarn format
+      - name: Check format
+        run: git diff --exit-code
+      - name: Build
+        run: yarn build
+      - name: Checked in build?
+        run: git diff --exit-code
+      # tried to use https://github.community/t5/GitHub-Actions/Usage-of-expressions-and-contexts-in-uses-clause/m-p/39507/highlight/false#M3837
+      # but doesn't seem to work
+      - name: Test (ignored)
+        uses: ./
+        with:
+          dirtyLabel: "PR: needs rebase"
+          removeOnDirtyLabel: "PR: ready to ship"
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
+      - name: Test
+        uses: eps1lon/actions-label-merge-conflict@master
+        with:
+          dirtyLabel: "PR: needs rebase"
+          removeOnDirtyLabel: "PR: ready to ship"
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"

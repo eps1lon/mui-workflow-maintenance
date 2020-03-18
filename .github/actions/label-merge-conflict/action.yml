@@ -1,0 +1,19 @@
+name: "Label Conflicting Pull Requests"
+description: "This action adds a given label to Pull Requests that have merge conflicts and removes a given label from these pull requests"
+inputs:
+  repoToken:
+    description: "Token for the repository. Can be passed in using {{ secrets.GITHUB_TOKEN }}"
+    required: true
+  dirtyLabel:
+    description: "Name of the label which indicates that the branch is dirty"
+    required: true
+  removeOnDirtyLabel:
+    description: "Name of the label which should be removed"
+    required: true
+runs:
+  using: "node12"
+  main: "dist/index.js"
+author: "Sebastian Silbermann"
+branding:
+  icon: "activity"
+  color: "black"
