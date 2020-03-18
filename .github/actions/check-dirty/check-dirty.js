@@ -56,7 +56,7 @@ query {
   const {
     repository: { pullRequests }
   } = pullsResponse;
-  core.info(Object.keys(repository));
+  core.info(Object.keys(pullRequests));
 
   if (pullRequests.length === 0) {
     return;
