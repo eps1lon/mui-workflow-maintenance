@@ -7052,7 +7052,13 @@ function removeLabelIfExists(label, { number }, { client }) {
       name: label
     })
     .catch(error => {
-      core.debug(JSON.stringify(error, null, 2));
+      if (error.status !== 404) {
+        throw new Error(`error removing "${label}": ${error}`);
+      } else {
+        core.info(
+          `On #${number} label "${label}" doesn't need to be removed since it doesn't exist on that issue.`
+        );
+      }
     });
 }
 
