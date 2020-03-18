@@ -6939,7 +6939,7 @@ async function checkDirty(context) {
   const query = `
 query { 
   repository(owner:"${github.context.repo.owner}", name: "${github.context.repo.repo}") { 
-    pullRequests(first:100, after:${endCursor}, states: OPEN) {
+    pullRequests(first:100, after:${after}, states: OPEN) {
       nodes {
         mergeStateStatus
         number
