@@ -6955,7 +6955,7 @@ query openPullRequests($owner: String!, $repo: String!, $after: String) {
   }
 }
   `;
-  core.info(query);
+  core.debug(query);
   const pullsResponse = await client.graphql(query, {
     headers: {
       accept: "application/vnd.github.merge-info-preview+json"
@@ -6967,12 +6967,10 @@ query openPullRequests($owner: String!, $repo: String!, $after: String) {
 
   const {
     repository: {
-      pullRequests: { nodes: pullRequests },
-      pageInfo
+      pullRequests: { nodes: pullRequests, pageInfo }
     }
   } = pullsResponse;
-  core.info(JSON.stringify(pullsResponse));
-  core.info(JSON.stringify(pullRequests));
+  core.debug(JSON.stringify(pullsResponse, null, 2));
 
   if (pullRequests.length === 0) {
     return;
@@ -7004,7 +7002,6 @@ query openPullRequests($owner: String!, $repo: String!, $after: String) {
     }
   }
 
-  core.info(JSON.stringify(pageInfo));
   if (pageInfo.hasNextPage) {
     return checkDirty({
       ...context,
