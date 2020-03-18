@@ -54,9 +54,9 @@ query {
   });
 
   const {
-    repository: { nodes: pullRequests, pageInfo }
+    repository: { nodes: pullRequests = [], pageInfo }
   } = pullsResponse;
-  core.info(Object.keys(pullRequests));
+  core.info(JSON.stringify(pullRequests));
 
   if (pullRequests.length === 0) {
     return;
