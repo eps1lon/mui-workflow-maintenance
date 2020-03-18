@@ -1,6 +1,5 @@
 const core = require("@actions/core");
 const github = require("@actions/github");
-const { graphql } = require("@octokit/graphql");
 
 async function main() {
   const repoToken = core.getInput("repoToken", { required: true });
@@ -64,25 +63,20 @@ query openPullRequests($owner: String!, $repo: String!, $after: String) {
       pullRequests: { nodes: pullRequests, pageInfo }
     }
   } = pullsResponse;
-  // JSON.stringify might be expensive
-  if (core.isDebug) {
-    core.debug(JSON.stringify(pullsResponse, null, 2));
-  }
+  core.debug(JSON.stringify(pullsResponse, null, 2));
 
   if (pullRequests.length === 0) {
     return;
   }
 
   for (const pullRequest of pullRequests) {
-    const isMergable = pullRequest.mergable === "MERGABLE";
-    core.info(
-      `PR "${pullRequest.title}" ${
-        !isMergable ? "is not mergable" : "is mergable"
-      }`
-    );
+    core.debug(JSON.stringify(pullRequest, null, 2));
+
+    const info = message => core.info(`for PR "${pullRequest.title}"`);
 
     switch (pullRequest.mergable) {
       case "CONFLICTING":
+        info(`add "${dirtyLabel}", remove "${removeOnDirtyLabel}"`);
         // for labels PRs and issues are the same
         await Promise.all([
           client.issues.addLabels({
@@ -100,6 +94,7 @@ query openPullRequests($owner: String!, $repo: String!, $after: String) {
         ]);
         break;
       case "MERGEABLE":
+        info(`remove "${dirtyLabel}"`);
         await Promise.all([
           client.issues.removeLabel({
             owner: github.context.repo.owner,
@@ -114,7 +109,7 @@ query openPullRequests($owner: String!, $repo: String!, $after: String) {
         // So we basically require a manual review pass after rebase.
         break;
       case "UNKNOWN":
-        // don't do anything when unknown
+        info(`do nothing`);
         break;
       default:
         throw new TypeError(
