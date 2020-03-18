@@ -72,37 +72,21 @@ query openPullRequests($owner: String!, $repo: String!, $after: String) {
   for (const pullRequest of pullRequests) {
     core.debug(JSON.stringify(pullRequest, null, 2));
 
-    const info = message => core.info(`for PR "${pullRequest.title}"`);
+    const info = message =>
+      core.info(`for PR "${pullRequest.title}": ${message}`);
 
     switch (pullRequest.mergeable) {
       case "CONFLICTING":
         info(`add "${dirtyLabel}", remove "${removeOnDirtyLabel}"`);
         // for labels PRs and issues are the same
         await Promise.all([
-          client.issues.addLabels({
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo,
-            issue_number: pullRequest.number,
-            labels: [dirtyLabel]
-          }),
-          client.issues.removeLabel({
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo,
-            issue_number: pullRequest.number,
-            name: removeOnDirtyLabel
-          })
+          addLabel(dirtyLabel, pullRequest, { client }),
+          removeLabel(removeOnDirtyLabel, pullRequest, { client })
         ]);
         break;
       case "MERGEABLE":
         info(`remove "${dirtyLabel}"`);
-        await Promise.all([
-          client.issues.removeLabel({
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo,
-            issue_number: pullRequest.number,
-            name: dirtyLabel
-          })
-        ]);
+        await removeLabel(dirtyLabel, pullRequest, { client });
         // while we removed a particular label once we enter "CONFLICTING"
         // we don't add it again because we assume that the removeOnDirtyLabel
         // is used to mark a PR as "merge!".
@@ -124,6 +108,44 @@ query openPullRequests($owner: String!, $repo: String!, $after: String) {
       after: pageInfo.endCursor
     });
   }
+}
+
+/**
+ *
+ * @param {string} label
+ * @param {object} pullRequest
+ * @param {object} context
+ */
+function addLabel(label, { number }, { client }) {
+  return client.issues
+    .addLabels({
+      owner: github.context.repo.owner,
+      repo: github.context.repo.repo,
+      issue_number: number,
+      labels: [label]
+    })
+    .catch(error => {
+      core.error(`error adding "${label}": ${error}`);
+    });
+}
+
+/**
+ *
+ * @param {string} label
+ * @param {object} pullRequest
+ * @param {object} context
+ */
+function removeLabel(label, { number }, { client }) {
+  return client.issues
+    .removeLabel({
+      owner: github.context.repo.owner,
+      repo: github.context.repo.repo,
+      issue_number: number,
+      name: dirtyLabel
+    })
+    .catch(error => {
+      core.error(`error removing "${label}": ${error}`);
+    });
 }
 
 main().catch(error => {
