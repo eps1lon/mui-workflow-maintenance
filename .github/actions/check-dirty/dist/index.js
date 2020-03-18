@@ -6960,7 +6960,7 @@ query openPullRequests($owner: String!, $repo: String!, $after: String) {
     headers: {
       accept: "application/vnd.github.merge-info-preview+json"
     },
-    afer,
+    after,
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,
   });
