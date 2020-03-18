@@ -6934,7 +6934,7 @@ async function main() {
  * @param {import('@actions/github').GitHub} context.client
  */
 async function checkDirty(context) {
-  const { client, dirtyLabel, removeOnDirtyLabel, endCursor } = context;
+  const { after, client, dirtyLabel, removeOnDirtyLabel } = context;
 
   const query = `
 query { 
@@ -6963,7 +6963,7 @@ query {
   });
 
   const {
-    repository: { pullRequests }
+    repository: { nodes: pullRequests, pageInfo }
   } = pullsResponse;
   core.info(Object.keys(pullRequests));
 
@@ -6997,10 +6997,12 @@ query {
     }
   }
 
-  return checkDirty({
-    ...context,
-    endCursor: pullsResponse.data.pageInfo.endCursor
-  });
+  if (pageInfo.hasNextPage) {
+    return checkDirty({
+      ...context,
+      after: pageInfo.endCursor
+    });
+  }
 }
 
 main().catch(error => {
