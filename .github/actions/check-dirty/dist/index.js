@@ -6962,13 +6962,17 @@ query openPullRequests($owner: String!, $repo: String!, $after: String) {
     },
     after,
     owner: github.context.repo.owner,
-    repo: github.context.repo.repo,
+    repo: github.context.repo.repo
   });
 
   const {
-    repository: { nodes: pullRequests = [], pageInfo }
+    repository: {
+      pullRequests: { nodes: pullRequests },
+      pageInfo
+    }
   } = pullsResponse;
   core.info(JSON.stringify(pullsResponse));
+  core.info(JSON.stringify(pullRequests));
 
   if (pullRequests.length === 0) {
     return;
