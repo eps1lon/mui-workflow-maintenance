@@ -6958,7 +6958,7 @@ query openPullRequests($owner: String!, $repo: String!, $after: String) {
   core.debug(query);
   const pullsResponse = await client.graphql(query, {
     headers: {
-      // merge-info preview causes mergable to become "UNKNOW" (from "CONFLICTING")
+      // merge-info preview causes mergeable to become "UNKNOW" (from "CONFLICTING")
       // kind of obvious to no rely on experimental features but...yeah
       //accept: "application/vnd.github.merge-info-preview+json"
     },
@@ -6983,7 +6983,7 @@ query openPullRequests($owner: String!, $repo: String!, $after: String) {
 
     const info = message => core.info(`for PR "${pullRequest.title}"`);
 
-    switch (pullRequest.mergable) {
+    switch (pullRequest.mergeable) {
       case "CONFLICTING":
         info(`add "${dirtyLabel}", remove "${removeOnDirtyLabel}"`);
         // for labels PRs and issues are the same
@@ -7022,7 +7022,7 @@ query openPullRequests($owner: String!, $repo: String!, $after: String) {
         break;
       default:
         throw new TypeError(
-          `unhandled mergable state '${pullRequest.mergable}'`
+          `unhandled mergeable state '${pullRequest.mergeable}'`
         );
     }
   }
