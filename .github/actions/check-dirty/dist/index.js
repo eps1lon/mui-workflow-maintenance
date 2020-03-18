@@ -7034,7 +7034,7 @@ function addLabel(label, { number }, { client }) {
       labels: [label]
     })
     .catch(error => {
-      core.error(`error adding "${label}": ${error}`);
+      throw new Error(`error adding "${label}": ${error}`);
     });
 }
 
@@ -7053,7 +7053,7 @@ function removeLabel(label, { number }, { client }) {
       name: label
     })
     .catch(error => {
-      core.error(`error removing "${label}": ${error}`);
+      throw new Error(`error removing "${label}": ${error}`);
     });
 }
 
