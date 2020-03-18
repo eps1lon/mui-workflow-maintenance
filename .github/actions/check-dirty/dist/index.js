@@ -6951,7 +6951,6 @@ query openPullRequests($owner: String!, $repo: String!, $after: String) {
         hasNextPage
       }
     }
-    
   }
 }
   `;
@@ -6990,12 +6989,12 @@ query openPullRequests($owner: String!, $repo: String!, $after: String) {
         // for labels PRs and issues are the same
         await Promise.all([
           addLabel(dirtyLabel, pullRequest, { client }),
-          removeLabel(removeOnDirtyLabel, pullRequest, { client })
+          removeLabelIfExists(removeOnDirtyLabel, pullRequest, { client })
         ]);
         break;
       case "MERGEABLE":
         info(`remove "${dirtyLabel}"`);
-        await removeLabel(dirtyLabel, pullRequest, { client });
+        await removeLabelIfExists(dirtyLabel, pullRequest, { client });
         // while we removed a particular label once we enter "CONFLICTING"
         // we don't add it again because we assume that the removeOnDirtyLabel
         // is used to mark a PR as "merge!".
@@ -7044,7 +7043,7 @@ function addLabel(label, { number }, { client }) {
  * @param {object} pullRequest
  * @param {object} context
  */
-function removeLabel(label, { number }, { client }) {
+function removeLabelIfExists(label, { number }, { client }) {
   return client.issues
     .removeLabel({
       owner: github.context.repo.owner,
@@ -7053,7 +7052,7 @@ function removeLabel(label, { number }, { client }) {
       name: label
     })
     .catch(error => {
-      throw new Error(`error removing "${label}": ${error}`);
+      core.debug(JSON.stringify(error, null, 2));
     });
 }
 
