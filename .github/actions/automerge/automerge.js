@@ -12,6 +12,7 @@ function main() {
 
   return automerge({
     client,
+    dirtyLabel,
     failedLabel,
     mergeLabel,
     mergeMethod,
@@ -25,7 +26,14 @@ function main() {
  * @param {import('@actions/github').GitHub} context.client
  */
 async function automerge(context) {
-  const { client, failedLabel, mergeLabel, mergeMethod, page } = context;
+  const {
+    client,
+    dirtyLabel,
+    failedLabel,
+    mergeLabel,
+    mergeMethod,
+    page
+  } = context;
 
   const pullsResponse = await client.pulls.list({
     owner: github.context.repo.owner,
