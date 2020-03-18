@@ -32,8 +32,10 @@ query openPullRequests($owner: String!, $repo: String!, $after: String) {
   repository(owner:$owner, name: $repo) { 
     pullRequests(first:100, after:$after, states: OPEN) {
       nodes {
+        mergeable
         mergeStateStatus
         number
+        permalink
         title
         updatedAt
       }
@@ -68,12 +70,11 @@ query openPullRequests($owner: String!, $repo: String!, $after: String) {
   }
 
   for (const pullRequest of pullRequests) {
-    core.info(
-      `found pr: ${pullRequest.title} last updated ${pullRequest.updatedAt}`
-    );
+    core.info(`found pr: "${pullRequest.title}" at ${pullRequest.permalink}`);
 
-    core.info(Object.keys(pullRequest));
-    core.info(`pr's mergable state is ${pullRequest.mergeStateStatus}`);
+    core.info(
+      `mergeStateStatus: '${pullRequest.mergeStateStatus}', mergable: '${pullRequest.mergeable}'`
+    );
     if (pullRequest.mergeStateStatus === "DIRTY") {
       // for labels PRs and issues are the same
       await Promise.all([
