@@ -6962,9 +6962,10 @@ query {
     }
   });
 
-  const {
-    repository: { pullRequests }
-  } = pullsResponse;
+  const { repository } = pullsResponse;
+
+  core.info(Object.keys(repository));
+  const { pullRequests } = repository;
 
   if (pullRequests.length === 0) {
     return;
