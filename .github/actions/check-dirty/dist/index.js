@@ -6937,9 +6937,9 @@ async function checkDirty(context) {
   const { after, client, dirtyLabel, removeOnDirtyLabel } = context;
 
   const query = `
-query { 
-  repository(owner:"${github.context.repo.owner}", name: "${github.context.repo.repo}") { 
-    pullRequests(first:100, after:${after}, states: OPEN) {
+query openPullRequests($owner: String!, $repo: String!, $after: String) { 
+  repository(owner:$owner, name: $repo) { 
+    pullRequests(first:100, after:$after, states: OPEN) {
       nodes {
         mergeStateStatus
         number
@@ -6955,17 +6955,20 @@ query {
   }
 }
   `;
-  core.debug(query);
+  core.info(query);
   const pullsResponse = await client.graphql(query, {
     headers: {
       accept: "application/vnd.github.merge-info-preview+json"
-    }
+    },
+    afer,
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo,
   });
 
   const {
     repository: { nodes: pullRequests = [], pageInfo }
   } = pullsResponse;
-  core.info(JSON.stringify(pullRequests));
+  core.info(JSON.stringify(pullsResponse));
 
   if (pullRequests.length === 0) {
     return;
