@@ -6936,8 +6936,6 @@ async function main() {
 async function checkDirty(context) {
   const { after, client, dirtyLabel, removeOnDirtyLabel } = context;
 
-  // mergeStateStatus is includede for experimenting
-  // it's unclear if a pr can have mergeStateStatus=dirty AND mergable!=MERGABLE
   const query = `
 query openPullRequests($owner: String!, $repo: String!, $after: String) { 
   repository(owner:$owner, name: $repo) { 
@@ -6961,6 +6959,8 @@ query openPullRequests($owner: String!, $repo: String!, $after: String) {
   core.debug(query);
   const pullsResponse = await client.graphql(query, {
     headers: {
+      // merge-info preview causes mergable to become "UNKNOW" (from "CONFLICTING")
+      // kind of obvious to no rely on experimental features but...yeah
       //accept: "application/vnd.github.merge-info-preview+json"
     },
     after,
@@ -6990,22 +6990,45 @@ query openPullRequests($owner: String!, $repo: String!, $after: String) {
       }`
     );
 
-    if (!isMergable) {
-      // for labels PRs and issues are the same
-      await Promise.all([
-        client.issues.addLabels({
-          owner: github.context.repo.owner,
-          repo: github.context.repo.repo,
-          issue_number: pullRequest.number,
-          labels: [dirtyLabel]
-        }),
-        client.issues.removeLabel({
-          owner: github.context.repo.owner,
-          repo: github.context.repo.repo,
-          issue_number: pullRequest.number,
-          name: removeOnDirtyLabel
-        })
-      ]);
+    switch (pullRequest.mergable) {
+      case "CONFLICTING":
+        // for labels PRs and issues are the same
+        await Promise.all([
+          client.issues.addLabels({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+            issue_number: pullRequest.number,
+            labels: [dirtyLabel]
+          }),
+          client.issues.removeLabel({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+            issue_number: pullRequest.number,
+            name: removeOnDirtyLabel
+          })
+        ]);
+        break;
+      case "MERGEABLE":
+        await Promise.all([
+          client.issues.removeLabel({
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+            issue_number: pullRequest.number,
+            name: dirtyLabel
+          })
+        ]);
+        // while we removed a particular label once we enter "CONFLICTING"
+        // we don't add it again because we assume that the removeOnDirtyLabel
+        // is used to mark a PR as "merge!".
+        // So we basically require a manual review pass after rebase.
+        break;
+      case "UNKNOWN":
+        // don't do anything when unknown
+        break;
+      default:
+        throw new TypeError(
+          `unhandled mergable state '${pullRequest.mergable}'`
+        );
     }
   }
 
